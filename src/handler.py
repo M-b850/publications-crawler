@@ -29,6 +29,9 @@ def prosessPage_30book(url):
     text = re.sub(r'\n{2,}', '\n', text)
     # Remove all spaaces more than one
     text = re.sub(r'\s{2,}', '\n', text)
+    # Split by نظرات کاربران
+    text = text.split('نظرات کاربران')[0]
+
 
     # author: If starts with نویسنده:
     # There is only one author
@@ -64,6 +67,7 @@ def prosessPage_30book(url):
     else:
         title = title[0].replace("خرید کتاب", "").replace("اثر", "")
     # Translator: If starts with مترجم:
+    """
     translator = re.findall(r'مترجم:[^\n]+', text)
     if "مترجم:" not in text:
         translator = None
@@ -71,6 +75,30 @@ def prosessPage_30book(url):
         translator = "Unknown"
     else:
         translator = translator[0].replace("مترجم:", "").strip()
+    """
+    if "مترجم:" in text:
+        translator = re.findall(r'مترجم:[^\n]+', text)
+        if len(translator) == 0:
+            translator = "Unknown"
+        else:
+            translator = translator[0].replace("مترجم:", "").strip()
+    elif "مترجمان:" in text:
+        translator = re.findall(r'مترجمان:[^\n]+', text)
+        if len(translator) == 0:
+            translator = "Unknown"
+        else:
+            translator = translator[0].replace("مترجمان:", "").strip()
+        temps = re.findall(r'{0}[^\n]+'.format(translator.split()[0]), text)
+        # if any contains ، select and split it
+        if len(translator) == 0:
+            translator = "Unknown"
+        else:
+            for i in temps:
+                if "،" in i:
+                    translator = i.split("،")
+                    break
+    else:
+        translator = "Unknown"
     # ISBN: find number between 10 and 13 digits
     isbn = re.findall(r'\d{10,13}', text)
     if len(isbn) == 0:
@@ -85,37 +113,34 @@ def prosessPage_30book(url):
         publisher = publisher[0].replace("نشر:", "").replace("\n", "")
     
     coverTypes = [
-        "رحلی بزرگ", "رحلی کوچک", "خشتی", 
-        "۲۴×۱۶/۸", "رقعی", "جیبی", "پالتویی",
+        "شومیز", "کاغذی", "گالینگور", "سخت",
     ]
     # If any of the coverTypes in the text assign it to coverType
     coverType = "Unknown"
     if "جلد کتاب" in text:
-        for coverType in coverTypes:
-            if coverType in text:
-                coverType = coverType
+        for c in coverTypes:
+            cover = re.findall(r'{0}\n'.format(c), text)
+            if len(cover) > 0:
+                coverType = c
                 break
-    # If coverType is not assigned assign it to Unknown
-    if coverType is None:
-        coverType = "Unknown"
 
     sizeTypes = [
-        "قطع", "وزیری", "وزیری جدید", "پالتویی", "رحلی", "خشتی", "جیبی"
+        "رحلی بزرگ", "رحلی کوچک", "خشتی", 
+        "۲۴×۱۶/۸", "رقعی", "جیبی", "پالتویی",
+        "وزیری", "رحلی", "سلطانی", "جیبی بزرگ",
+        "خشتی کوچک", "خشتی بزرگ", "جیبی کوچک", 
     ]
     # If any of the sizeTypes in the text assign it to sizeType
     sizeType = "Unknown"
     if "قطع کتاب" in text:
-        for sizeType in sizeTypes:
-            if sizeType in text:
-                sizeType = sizeType
+        for s in sizeTypes:
+            size = re.findall(r'{0}\n'.format(s), text)
+            if len(size) > 0:
+                sizeType = s
                 break
-    # If sizeType is not assigned assign it to Unknown
-    if sizeType is None:
-        sizeType = "Unknown"
 
     # Pages Count: is numbers before صفحه
     pagesCount = re.findall(r'\d+ صفحه', text)
-    pagesCount = "Unknown"
     if len(pagesCount) == 0:
         pagesCount = "Unknown"
     else:
@@ -136,6 +161,6 @@ def prosessPage_30book(url):
         "url": url,
         "coverUrl": coverUrl,
     }
-    file_test = open("temp/test.txt", "w")
-    file_test.write(text)
+    # file_test = open("temp/test.txt", "w")
+    # file_test.write(text)
     return info

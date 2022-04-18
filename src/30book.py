@@ -43,8 +43,7 @@ crawl.get_book_info = None
 def main():
     DIR = os.path.dirname(os.path.abspath(__file__))
     print(DIR)
-    file = open("temp/test2.txt", "a")
-    # book-urls
+    file = open("temp/book-urls.txt", "a")
 
     print("Start crawling...")
     for url in urls:
@@ -78,7 +77,8 @@ def collect(url):
 
 if __name__ == '__main__':
     # main()
-    urls = open("temp/book-urls.txt").read().split("\n")
+    urls = open("temp/test2.txt").read().split("\n")
+    # book-urls
     for url in urls:
         r = collect(url)
         # Chck if the book is already in the database
