@@ -76,14 +76,19 @@ def collect(url):
             crawl.log_actions("No info for url: {}".format(url))
 
 if __name__ == '__main__':
+    line_number = 0
+
     # main()
-    urls = open("temp/test2.txt").read().split("\n")
+    urls = open("temp/book-urls.txt").read().split("\n")
     # book-urls
     for url in urls:
         r = collect(url)
         # Chck if the book is already in the database
         
         # add dict to book-info.json
-        with open("temp/book-info.json", "a") as f:
+        with open("temp/book-info.json", "a", encoding="utf-8") as f:
             f.write(json.dumps(r, ensure_ascii=False) + "," + "\n")
+            line_number += 1
             f.flush()
+            file = open("temp/line_numer.txt", "w+", encoding="utf-8")
+            file.write(str(line_number))
